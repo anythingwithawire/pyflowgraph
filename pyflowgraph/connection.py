@@ -5,21 +5,28 @@
 
 from qtpy import QtGui, QtWidgets, QtCore
 
+import pyflowgraph.graph_view
+from .node import Node
 
 class Connection(QtWidgets.QGraphicsPathItem):
     __defaultPen = QtGui.QPen(QtGui.QColor(168, 134, 3), 1.5)
 
-    def __init__(self, graph, srcPortCircle, dstPortCircle):
+    def __init__(self, graph, srcPortCircle, dstPortCircle, ps, pd):
         super(Connection, self).__init__()
 
         self.__graph = graph
         self.__srcPortCircle = srcPortCircle
         self.__dstPortCircle = dstPortCircle
+        self.__sTrunk = ps
+        self.__dTrunk = pd
         penStyle = QtCore.Qt.DashLine
 
         self.__connectionColor = QtGui.QColor(0, 0, 0)
         self.__connectionColor.setRgbF(*self.__srcPortCircle.getColor().getRgbF())
         self.__connectionColor.setAlpha(125)
+        if self.isSelected():
+            self.__connectionColor.setAlpha(255)
+
 
         self.__defaultPen = QtGui.QPen(self.__connectionColor, 1.5, style=penStyle)
         self.__defaultPen.setDashPattern([1, 2, 2, 1])
@@ -33,6 +40,7 @@ class Connection(QtWidgets.QGraphicsPathItem):
 
         self.setPen(self.__defaultPen)
         self.setZValue(-1)
+
 
         self.setAcceptHoverEvents(True)
         self.connect()
@@ -85,19 +93,26 @@ class Connection(QtWidgets.QGraphicsPathItem):
 
         dist_between = dstPoint - srcPoint
 
+        x = self.__sTrunk.x() + 150
+        y = self.__sTrunk.y()
+
         self.__path = QtGui.QPainterPath()
         self.__path.moveTo(srcPoint)
-        self.__path.cubicTo(
-            srcPoint + QtCore.QPointF(dist_between.x() * 0.4, 0),
-            dstPoint - QtCore.QPointF(dist_between.x() * 0.4, 0),
-            dstPoint
-            )
+
+        self.__path.lineTo(QtCore.QPointF(QtCore.QPointF(x,y)))
+        self.__path.lineTo(QtCore.QPointF(QtCore.QPointF(self.__dTrunk)))
+
+        self.__path.lineTo(QtCore.QPointF(QtCore.QPointF(dstPoint)))
+
+
+        self.setSelected(True)
         self.setPath(self.__path)
         super(Connection, self).paint(painter, option, widget)
 
 
     def hoverEnterEvent(self, event):
         self.setPen(self.__hoverPen)
+
         super(Connection, self).hoverEnterEvent(event)
 
 
@@ -110,6 +125,8 @@ class Connection(QtWidgets.QGraphicsPathItem):
         if event.button() == QtCore.Qt.LeftButton:
             self.__dragging = True
             self._lastDragPoint = self.mapToScene(event.pos())
+            self.setSelected(True)
+            print("selected")
             event.accept()
         else:
             super(Connection, self).mousePressEvent(event)

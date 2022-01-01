@@ -18,33 +18,54 @@ from pyflowgraph.graph_view import GraphView
 from pyflowgraph.graph_view_widget import GraphViewWidget
 from pyflowgraph.node import Node
 from pyflowgraph.port import InputPort, OutputPort, IOPort
-
+from pyflowgraph.cable import Cable
 
 app = QtWidgets.QApplication(sys.argv)
 
 widget = GraphViewWidget()
 graph = GraphView(parent=widget)
 
-node1 = Node(graph, 'Short')
-node1.addPort(InputPort(node1, graph, 'InPort1', QtGui.QColor(128, 170, 170, 255), 'MyDataX'))
-node1.addPort(InputPort(node1, graph, 'InPort2', QtGui.QColor(128, 170, 170, 255), 'MyDataX'))
-node1.addPort(OutputPort(node1, graph, 'OutPort', QtGui.QColor(32, 255, 32, 255), 'MyDataY'))
-node1.addPort(IOPort(node1, graph, 'IOPort1', QtGui.QColor(32, 255, 32, 255), 'MyDataY'))
-node1.addPort(IOPort(node1, graph, 'IOPort2', QtGui.QColor(32, 255, 32, 255), 'MyDataY'))
-node1.setGraphPos(QtCore.QPointF( -100, 0 ))
+cables = []
 
+
+#from .node import Node
+#from .port import InputPort, OutputPort, IOPort
+#from .cable import Cable
+
+termMap = []
+for c in range(1,13):
+    termMap.append(c)
+
+t = termMap[6]
+termMap[6]=termMap[9]
+termMap[9] = t
+
+
+node1 = Node(graph, 'Terminals001')
+for c in range(0,11):
+    pname = str(c).zfill(2)
+
+    if c == 3:
+        pname = str(7).zfill(2)
+    if c == 7:
+        pname = str(3).zfill(2)
+
+    node1.addPort(OutputPort(node1, graph, pname, QtGui.QColor(128, 170, 170, 255), 'xxx'))
+node1.setGraphPos(QtCore.QPointF( 500, 0 ))
 graph.addNode(node1)
 
-node2 = Node(graph, 'ReallyLongLabel')
-node2.addPort(InputPort(node2, graph, 'InPort1', QtGui.QColor(128, 170, 170, 255), 'MyDataY'))
-node2.addPort(InputPort(node2, graph, 'InPort2', QtGui.QColor(128, 170, 170, 255), 'MyDataX'))
-node2.addPort(OutputPort(node2, graph, 'OutPort', QtGui.QColor(32, 255, 32, 255), 'MyDataY'))
-node2.addPort(IOPort(node2, graph, 'IOPort1', QtGui.QColor(32, 255, 32, 255), 'MyDataY'))
-node2.addPort(IOPort(node2, graph, 'IOPort2', QtGui.QColor(32, 255, 32, 255), 'MyDataY'))
-node2.setGraphPos(QtCore.QPointF( 100, 0 ))
-
+node2 = Node(graph, 'Terminals002')
+for c in range(0,11):
+    pname = str(c).zfill(2)
+    node2.addPort(InputPort(node2, graph, pname, QtGui.QColor(128, 170, 170, 255), 'zzz'))
+node2.setGraphPos(QtCore.QPointF(-500, 0 ))
 graph.addNode(node2)
-graph.connectPorts(node1, 'OutPort', node2, 'InPort1')
+
+
+cables.append(Cable(graph, "NewCable001", node1, node1.getPorts(), termMap, node2, node2.getPorts(), termMap))
+
+
+
 
 widget.setGraphView(graph)
 widget.show()

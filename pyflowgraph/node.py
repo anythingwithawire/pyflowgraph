@@ -115,7 +115,7 @@ class Node(QtWidgets.QGraphicsWidget):
         self.__graph = graph
         self.__color = self.__defaultColor
 
-        self.setMinimumWidth(60)
+        self.setMinimumWidth(20)
         self.setMinimumHeight(20)
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
 
@@ -262,6 +262,15 @@ class Node(QtWidgets.QGraphicsWidget):
                 return port
         return None
 
+
+    def getPorts(self):
+        p = []
+        if self.__ports:
+            for port in self.__ports:
+                p.append(port)
+            return p
+        else:
+            return None
 
     def paint(self, painter, option, widget):
         rect = self.windowFrameRect()

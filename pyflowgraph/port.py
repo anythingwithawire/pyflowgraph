@@ -100,6 +100,32 @@ class PortLabel(QtWidgets.QGraphicsWidget):
     #     painter.setPen(QtGui.QPen(QtGui.QColor(0, 0, 255)))
     #     painter.drawRect(self.windowFrameRect())
 
+class Cable():
+
+    def __init__(self, cabletype, cablename, numcores):
+        super().__init__()
+
+        self.__type = cabletype
+        self.__name = cablename
+        self.__numcores = numcores
+
+        self.__coresseqnum = []
+        self.__corenames = []
+        self.__corefromx = []
+        self.__corefromy = []
+        self.__coretox = []
+        self.__coretoy= []
+
+        for c in range(numcores):
+            self.__coresseqnum.append(c)
+            self.__corenames.append(str(c+1).zfill(3))
+            self.__corefromx.append(100)
+            self.__coretox.append(0)
+            self.__corefromy.append(-100)
+            self.__coretoy.append(0)
+
+
+
 
 class PortCircle(QtWidgets.QGraphicsWidget):
 
@@ -113,6 +139,7 @@ class PortCircle(QtWidgets.QGraphicsWidget):
         self._graph = graph
         self._connectionPointType = connectionPointType
         self.__connections = set()
+        self.__cable = []
         self._supportsOnlySingleConnections = connectionPointType == 'In'
 
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed))
@@ -124,6 +151,8 @@ class PortCircle(QtWidgets.QGraphicsWidget):
 
         self.__defaultPen = QtGui.QPen(QtGui.QColor(25, 25, 25), 1.0)
         self.__hoverPen = QtGui.QPen(QtGui.QColor(255, 255, 100), 1.5)
+
+        self.__iscable = True
 
         self._ellipseItem = QtWidgets.QGraphicsEllipseItem(self)
         self._ellipseItem.setPen(self.__defaultPen)
@@ -241,6 +270,7 @@ class PortCircle(QtWidgets.QGraphicsWidget):
             for c in connections:
                 self._graph.removeConnection(c)
 
+        #self.__cable.append(Cable("name1", "type1", 16))
         self.__connections.add(connection)
 
         return True

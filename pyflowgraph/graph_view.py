@@ -362,7 +362,7 @@ class GraphView(QtWidgets.QGraphicsView):
             self.connectionRemoved.emit(connection)
 
 
-    def connectPorts(self, srcNode, outputName, tgtNode, inputName):
+    def connectPorts(self, srcNode, outputName, tgtNode, inputName, ps, pd):
 
         if isinstance(srcNode, Node):
             sourceNode = srcNode
@@ -392,8 +392,8 @@ class GraphView(QtWidgets.QGraphicsView):
         if not targetPort:
             raise Exception("Node '" + targetNode.getName() + "' does not have input:" + inputName)
 
-        connection = Connection(self, sourcePort.outCircle(), targetPort.inCircle())
-        self.addConnection(connection, emitSignal=False)
+        connection = Connection(self, sourcePort.outCircle(), targetPort.inCircle(), ps, pd)
+        self.addConnection(connection, emitSignal=False )
 
         return connection
 
@@ -459,6 +459,15 @@ class GraphView(QtWidgets.QGraphicsView):
                         if node not in self._mouseDownSelection:
                             self.deselectNode(node, emitSignal=False)
 
+            elif modifiers == QtCore.Qt.AltModifier:
+                for name, connection in iteritems(self.__connections):
+                    if not connection.isSelected() and self._selectionRect.collidesWithItem(connection):
+                        self.selectConnection(connection, emitSignal=False)
+                    elif connection.isSelected() and not self._selectionRect.collidesWithItem(connection):
+                        if connection not in self._mouseDownSelection:
+                            self.deselectConnection(connection, emitSignal=False)
+
+
             else:
                 self.clearSelection(emitSignal=False)
 
@@ -467,6 +476,8 @@ class GraphView(QtWidgets.QGraphicsView):
                         self.selectNode(node, emitSignal=False)
                     elif node.isSelected() and not self._selectionRect.collidesWithItem(node):
                         self.deselectNode(node, emitSignal=False)
+                ### TODO clear connection
+
 
         elif self._manipulationMode == MANIP_MODE_PAN:
             delta = self.mapToScene(event.pos()) - self._lastPanPoint
@@ -582,7 +593,7 @@ class GraphView(QtWidgets.QGraphicsView):
         if PYQT5:
             zoomFactor = 1.0 + event.angleDelta().y() * self._mouseWheelZoomRate
         else:
-             zoomFactor = 1.0 + event.delta() * self._mouseWheelZoomRate
+            zoomFactor = 1.0 + event.delta() * self._mouseWheelZoomRate
 
         transform = self.transform()
 
